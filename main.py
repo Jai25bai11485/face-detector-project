@@ -27,3 +27,40 @@ BOTH_HAAR  = (0, 255, 128)
 BOTH_DNN   = (255, 128, 0)
 
 
+# Helpers
+
+def build_detectors(method: str, confidence: float):
+    """Return a list of ``(detector, label, colour)`` tuples."""
+    detectors = []
+    if method in ("haar", "both"):
+        detectors.append((HaarDetector(), "Haar", HAAR_COLOR))
+    if method in ("dnn", "both"):
+        detectors.append((DNNDetector(confidence_threshold=confidence), "DNN", DNN_COLOR))
+    return detectors
+
+
+def annotate(frame, detectors):
+    """Run every detector and draw results on *frame*."""
+    y_offset = 30
+
+    for det, label, color in detectors:
+        faces = det.detect(frame)
+        count = len(faces)
+        draw_detections(frame, faces, label=label, color=color)
+
+        # Draw individual face count for this detector
+        text = f"{label} Faces: {count}"
+        cv2.putText(
+            frame,
+            text,
+            (10, y_offset),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.8,
+            color,
+            2,
+            cv2.LINE_AA,
+        )
+        y_offset += 30  # Move down for the next detector's text
+
+    return frame
+
