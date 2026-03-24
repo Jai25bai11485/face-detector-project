@@ -2,7 +2,7 @@ import cv2
 
 
 class HaarDetector:
-    
+
 
     def __init__(self):
         cascade_path = (
