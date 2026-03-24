@@ -64,3 +64,45 @@ def annotate(frame, detectors):
 
     return frame
 
+# Modes
+
+def run_webcam(detectors, cam_index: int = 0):
+    """Live webcam detection loop."""
+    cap = cv2.VideoCapture(cam_index)
+    if not cap.isOpened():
+        print("[ERROR] Cannot open webcam.  Check your camera index.", file=sys.stderr)
+        sys.exit(1)
+
+    print("Webcam opened.  Press 'q' to quit.")
+
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            print("[WARN] Failed to grab frame.", file=sys.stderr)
+            break
+
+        frame = resize_frame(frame, width=720)
+        annotate(frame, detectors)
+
+        cv2.imshow("Face Detection", frame)
+        if cv2.waitKey(1) & 0xFF == ord("q"):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+
+def run_image(detectors, image_path: str):
+    """Detect faces in a single image file."""
+    frame = cv2.imread(image_path)
+    if frame is None:
+        print(f"[ERROR] Cannot read image: {image_path}", file=sys.stderr)
+        sys.exit(1)
+
+    frame = resize_frame(frame, width=720)
+    annotate(frame, detectors)
+
+    cv2.imshow("Face Detection", frame)
+    print("Press any key to close the window.")
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
