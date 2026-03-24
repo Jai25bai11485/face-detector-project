@@ -106,3 +106,65 @@ def run_image(detectors, image_path: str):
     print("Press any key to close the window.")
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+# CLI
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Face detection with Haar Cascades and/or DNN (Caffe SSD)."
+    )
+    parser.add_argument(
+        "--mode",
+        choices=["webcam", "image"],
+        default="webcam",
+        help="Input source (default: webcam).",
+    )
+    parser.add_argument(
+        "--method",
+        choices=["haar", "dnn", "both"],
+        default="both",
+        help="Detection method (default: both).",
+    )
+    parser.add_argument(
+        "--input",
+        type=str,
+        default=None,
+        help="Path to image file (required when --mode image).",
+    )
+    parser.add_argument(
+        "--confidence",
+        type=float,
+        default=0.5,
+        help="Minimum confidence threshold for DNN detector (default: 0.5).",
+    )
+    parser.add_argument(
+        "--camera",
+        type=int,
+        default=0,
+        help="Webcam device index (default: 0).",
+    )
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+
+    if args.mode == "image" and args.input is None:
+        print("[ERROR] --input is required when --mode is 'image'.", file=sys.stderr)
+        sys.exit(1)
+
+    print(f"Mode   : {args.mode}")
+    print(f"Method : {args.method}")
+    print(f"Conf.  : {args.confidence}")
+    print()
+
+    detectors = build_detectors(args.method, args.confidence)
+
+    if args.mode == "webcam":
+        run_webcam(detectors, cam_index=args.camera)
+    else:
+        run_image(detectors, args.input)
+
+
+if __name__ == "__main__":
+    main()
